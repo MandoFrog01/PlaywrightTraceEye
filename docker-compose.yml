@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  e2e-playwright-trace-router:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: e2e-playwright-trace-router
+    ports:
+      - "${TRACE_ROUTER_PORT}:${TRACE_ROUTER_PORT}"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - ALLURE_SERVER=${ALLURE_SERVER}
+      - TRACE_VIEWER_IP=${TRACE_VIEWER_IP}
+      - TRACE_VIEWER_PORT=${TRACE_VIEWER_PORT}
+      - TRACE_ROUTER_IP=${TRACE_ROUTER_IP}
+      - TRACE_ROUTER_PORT=${TRACE_ROUTER_PORT}
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT}
+    env_file:
+      - ./.env
+    networks:
+      - trace-viewer-network
+
+  playwright-trace-viewer:
+    build:
+      context: .
+      dockerfile: trace-viewer.Dockerfile
+    container_name: playwright-trace-viewer
+    ports:
+      - "${TRACE_VIEWER_PORT}:${TRACE_VIEWER_PORT}"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - TRACE_VIEWER_IP=${TRACE_VIEWER_IP}
+      - TRACE_VIEWER_PORT=${TRACE_VIEWER_PORT}
+    env_file:
+      - ./.env
+    networks:
+      - trace-viewer-network
+
+networks:
+  trace-viewer-network:
+    driver: bridge
