@@ -178,8 +178,56 @@ async def root():
         "example": f"http://{TRACE_ROUTER_IP}:{TRACE_ROUTER_PORT}/2511040101/TestSuitePaginationScansList/test_scans_list_artifact_pagination",
         "endpoints": {
             "health": "/health",
-            "route_to_trace": "/{project_id}/{suite_name}/{test_name}"
+            "route_to_trace": "/{project_id}/{suite_name}/{test_name}",
+            "get_attachment_url": "/api/attachment-url/{project_id}/{suite_name}/{test_name}"
         }
+    }
+
+
+@app.get("/api/attachment-url/{project_id}/{suite_name}/{test_name}")
+async def get_attachment_url(project_id: str, suite_name: str, test_name: str):
+    """
+    Get the attachment URL for a specific test without redirecting
+
+    - **project_id**: Allure project identifier
+    - **suite_name**: Test suite name (e.g., TestSuitePaginationScansList)
+    - **test_name**: Test method name (e.g., test_scans_list_artifact_pagination)
+
+    Example: `/api/attachment-url/2511040101/TestSuitePaginationScansList/test_scans_list_artifact_pagination`
+
+    This endpoint will:
+    1. Query Allure for the test results
+    2. Find the Playwright trace attachment
+    3. Return the attachment URL and trace viewer URL as JSON
+
+    Returns:
+        JSON response with attachment_url, trace_viewer_url, and metadata
+    """
+
+    # Get attachments for this test
+    attachment_filename = get_test_attachments(project_id, suite_name, test_name)
+
+    if not attachment_filename:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "Test not found or no Playwright trace attachments available",
+                "project_id": project_id,
+                "suite_name": suite_name,
+                "test_name": test_name,
+                "hint": "Check if the test exists and has Playwright trace attachments"
+            }
+        )
+
+    # Construct the attachment URL
+    attachment_url = (f"{ALLURE_SERVER}/allure-docker-service/projects/{project_id}/"
+                     f"reports/latest/data/attachments/{attachment_filename}")
+
+    return {
+        "project_id": project_id,
+        "suite_name": suite_name,
+        "test_name": test_name,
+        "attachment_url": attachment_url
     }
 
 

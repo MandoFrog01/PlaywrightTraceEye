@@ -100,6 +100,3 @@ If you encounter issues:
 3. Check the router logs for detailed error messages:
    ```bash
    docker logs e2e-playwright-trace-router
-   ```
-
-
