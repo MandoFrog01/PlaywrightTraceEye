@@ -3,7 +3,10 @@
 # Allure Server URL
 ALLURE_SERVER=http://10.90.107.91:5050
 
-# Trace Host IP
+# Routing Domain (for centralized HTTPS access)
+ROUTING_DOMAIN=https://ip-10-90-107-91.jfrogdev.org
+
+# Trace Host IP (used for local development)
 TRACE_VIEWER_IP=localhost
 TRACE_ROUTER_IP=0.0.0.0
 

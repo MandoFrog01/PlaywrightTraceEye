@@ -31,11 +31,14 @@ cp dotenv_sample .env
 Edit the `.env` file to configure:
 
 - `ALLURE_SERVER`: URL of your Allure server
-- `TRACE_VIEWER_IP`: IP address for the trace viewer service
+- `ROUTING_DOMAIN`: (Optional) Centralized domain for HTTPS routing (e.g., `https://ip-10-90-107-91.jfrogdev.org`)
+- `TRACE_VIEWER_IP`: IP address for the trace viewer service (used for local development)
 - `TRACE_ROUTER_IP`: IP address for the router service
 - `TRACE_VIEWER_PORT`: Port for the trace viewer service
 - `TRACE_ROUTER_PORT`: Port for the router service
 - `REQUEST_TIMEOUT`: Timeout for requests to the Allure server
+
+**Note:** When `ROUTING_DOMAIN` is set, the router will use it for generating trace viewer and attachment URLs. Otherwise, it falls back to local configuration.
 
 ## Installation and Usage
 
@@ -44,7 +47,15 @@ Edit the `.env` file to configure:
 Build and start the services using Docker Compose:
 
 ```bash
+docker-compose build
 docker-compose up -d
+```
+
+To rebuild and restart after configuration changes:
+
+```bash
+docker-compose build e2e-playwright-trace-router
+docker-compose up -d e2e-playwright-trace-router
 ```
 
 This will start both the router and trace viewer services.

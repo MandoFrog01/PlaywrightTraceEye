@@ -12,6 +12,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - ALLURE_SERVER=${ALLURE_SERVER}
+      - ROUTING_DOMAIN=${ROUTING_DOMAIN}
       - TRACE_VIEWER_IP=${TRACE_VIEWER_IP}
       - TRACE_VIEWER_PORT=${TRACE_VIEWER_PORT}
       - TRACE_ROUTER_IP=${TRACE_ROUTER_IP}

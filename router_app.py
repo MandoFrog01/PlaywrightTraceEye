@@ -25,11 +25,19 @@ app = FastAPI(
 
 # Configuration from environment variables
 ALLURE_SERVER = os.getenv("ALLURE_SERVER")
+ROUTING_DOMAIN = os.getenv("ROUTING_DOMAIN")
 TRACE_VIEWER_IP = os.getenv("TRACE_VIEWER_IP")
 TRACE_VIEWER_PORT = os.getenv("TRACE_VIEWER_PORT")
 TRACE_ROUTER_IP = os.getenv("TRACE_ROUTER_IP")
 TRACE_ROUTER_PORT = os.getenv("TRACE_ROUTER_PORT")
-TRACE_VIEWER_PATH = f"http://{TRACE_VIEWER_IP}:{TRACE_VIEWER_PORT}/trace/index.html"
+
+# Use ROUTING_DOMAIN if set, otherwise fall back to local configuration
+if ROUTING_DOMAIN:
+    TRACE_VIEWER_PATH = f"{ROUTING_DOMAIN}/trace/trace/index.html"
+    ALLURE_ATTACHMENT_BASE = f"{ROUTING_DOMAIN}/allure-docker-service"
+else:
+    TRACE_VIEWER_PATH = f"http://{TRACE_VIEWER_IP}:{TRACE_VIEWER_PORT}/trace/index.html"
+    ALLURE_ATTACHMENT_BASE = ALLURE_SERVER
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
 
 
@@ -155,8 +163,6 @@ def get_test_attachments(project_id: str, suite_name: str, test_name: str) -> Op
         logger.error(f"Error fetching test attachments: {e}")
         return None
 
-
-
 @app.get("/health")
 async def health_check():
     """
@@ -219,8 +225,8 @@ async def get_attachment_url(project_id: str, suite_name: str, test_name: str):
             }
         )
 
-    # Construct the attachment URL
-    attachment_url = (f"{ALLURE_SERVER}/allure-docker-service/projects/{project_id}/"
+    # Construct the attachment URL using routing domain if configured
+    attachment_url = (f"{ALLURE_ATTACHMENT_BASE}/projects/{project_id}/"
                      f"reports/latest/data/attachments/{attachment_filename}")
 
     return {
@@ -265,14 +271,14 @@ async def route_to_trace(project_id: str, suite_name: str, test_name: str):
             }
         )
 
-    # Construct the attachment URL
-    attachment_url = (f"{ALLURE_SERVER}/allure-docker-service/projects/{project_id}/"
+    # Construct the attachment URL using routing domain if configured
+    attachment_url = (f"{ALLURE_ATTACHMENT_BASE}/projects/{project_id}/"
                      f"reports/latest/data/attachments/{attachment_filename}")
 
     logger.info(f"Attachment URL: {attachment_url}")
     # Construct the trace viewer URL with the attachment
     trace_viewer_url = f"{TRACE_VIEWER_PATH}?trace={attachment_url}"
-    logger.info(trace_viewer_url)
+    logger.info(f"Trace Viewer URL: {trace_viewer_url}")
 
 
     # Redirect to the trace viewer
