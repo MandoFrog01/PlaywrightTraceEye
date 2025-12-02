@@ -105,6 +105,20 @@ def get_attachment_by_name(test_result: dict, name: str) -> Optional[dict]:
             if result:
                 return result
 
+    # Search testStage (the actual test steps)
+    test_stage = test_result.get('testStage', {})
+    
+    # Check testStage direct attachments
+    for att in test_stage.get('attachments', ()):
+        if att.get('name') == name:
+            return att
+    
+    # Search testStage steps recursively
+    if test_stage.get('steps'):
+        result = _search_steps(test_stage['steps'])
+        if result:
+            return result
+
     # Search afterStages (teardown fixtures)
     for stage in test_result.get('afterStages', ()):
         for att in stage.get('attachments', ()):
